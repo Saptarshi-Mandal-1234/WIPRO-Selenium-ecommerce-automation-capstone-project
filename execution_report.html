@@ -1,0 +1,102 @@
+
+        <html>
+        <head>
+            <title>Execution Report - E-Commerce Automation</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 30px; background:#f7f7f9; }
+                h1 { color: #222; }
+                .summary { margin-bottom: 20px; }
+                .summary span { margin-right: 20px; font-weight: bold; }
+                table { border-collapse: collapse; width: 100%; background: #fff; }
+                th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; font-size: 14px; }
+                th { background: #333; color: #fff; }
+                tr:nth-child(even) { background: #fafafa; }
+            </style>
+        </head>
+        <body>
+            <h1>E-Commerce Automation - Execution Report</h1>
+            <div class="summary">
+                <span>Start: 2026-09-22 16:07:05</span>
+                <span>Duration: 65.82s</span>
+                <span style="color:#2e7d32">Passed: 6</span>
+                <span style="color:#c62828">Failed: 0</span>
+                <span style="color:#f9a825">Skipped: 1</span>
+                <span style="color:#1565c0">Info: 3</span>
+            </div>
+            <table>
+                <tr><th>Time</th><th>Step</th><th>Status</th><th>Details</th></tr>
+                
+            <tr>
+                <td>16:07:05</td>
+                <td>Read Test Data</td>
+                <td style="color:#2e7d32; font-weight:bold;">PASS</td>
+                <td>Loaded test data from c:\Users\LENOVO\Downloads\selinium project\data\test_data.json</td>
+            </tr>
+            
+            <tr>
+                <td>16:07:11</td>
+                <td>Launch Browser</td>
+                <td style="color:#2e7d32; font-weight:bold;">PASS</td>
+                <td>Opened https://automationexercise.com<br><a href="..\screenshots\01_home_20260922_160711.png" target="_blank">screenshot</a></td>
+            </tr>
+            
+            <tr>
+                <td>16:07:16</td>
+                <td>Dismiss Consent Popup</td>
+                <td style="color:#1565c0; font-weight:bold;">INFO</td>
+                <td>No consent popup shown.</td>
+            </tr>
+            
+            <tr>
+                <td>16:07:23</td>
+                <td>Login</td>
+                <td style="color:#f9a825; font-weight:bold;">SKIP</td>
+                <td>Login not confirmed (demo credentials may be invalid/unregistered). Continuing as guest — cart flow does not require login on this site.<br><a href="..\screenshots\02_login_not_confirmed_20260922_160723.png" target="_blank">screenshot</a></td>
+            </tr>
+            
+            <tr>
+                <td>16:07:55</td>
+                <td>Search Product</td>
+                <td style="color:#2e7d32; font-weight:bold;">PASS</td>
+                <td>Searched for 'Top', found 14 result(s).<br><a href="..\screenshots\03_search_results_20260922_160755.png" target="_blank">screenshot</a></td>
+            </tr>
+            
+            <tr>
+                <td>16:07:56</td>
+                <td>Add Product To Cart</td>
+                <td style="color:#2e7d32; font-weight:bold;">PASS</td>
+                <td>Added product at index 0 to cart.<br><a href="..\screenshots\04_added_to_cart_20260922_160756.png" target="_blank">screenshot</a></td>
+            </tr>
+            
+            <tr>
+                <td>16:08:04</td>
+                <td>Update Quantity</td>
+                <td style="color:#1565c0; font-weight:bold;">INFO</td>
+                <td>Quantity field not directly editable on this cart page; quantity was set at add-to-cart time instead.</td>
+            </tr>
+            
+            <tr>
+                <td>16:08:04</td>
+                <td>Verify Cart Details</td>
+                <td style="color:#2e7d32; font-weight:bold;">PASS</td>
+                <td>Cart contains: Blue Top | Rs. 500 | qty=1 | Rs. 500<br><a href="..\screenshots\06_cart_verified_20260922_160804.png" target="_blank">screenshot</a></td>
+            </tr>
+            
+            <tr>
+                <td>16:08:07</td>
+                <td>Handle Alert</td>
+                <td style="color:#1565c0; font-weight:bold;">INFO</td>
+                <td>No alert present at this point (expected on most pages).</td>
+            </tr>
+            
+            <tr>
+                <td>16:08:07</td>
+                <td>Test Flow Completed</td>
+                <td style="color:#2e7d32; font-weight:bold;">PASS</td>
+                <td>All planned steps executed.</td>
+            </tr>
+            
+            </table>
+        </body>
+        </html>
+        

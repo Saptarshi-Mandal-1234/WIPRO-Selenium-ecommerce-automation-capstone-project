@@ -1,0 +1,14 @@
+{
+  "base_url": "https://automationexercise.com",
+  "login": {
+    "email": "your_registered_email@example.com",
+    "password": "your_password"
+  },
+  "search": {
+    "product_keyword": "Top"
+  },
+  "cart": {
+    "product_index_to_add": 0,
+    "quantity_to_set": 3
+  }
+}
