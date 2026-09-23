@@ -1,24 +1,7 @@
-"""
-Capstone Assignment 1: E-Commerce Web Automation using Selenium WebDriver + Python
-Target application : https://automationexercise.com/
+"""Utility script for automating a basic purchase flow on automationexercise.com.
 
-Covers all 10 required steps:
- 1. Launch browser
- 2. Login to application
- 3. Search product
- 4. Add product to cart
- 5. Update quantity
- 6. Verify cart details
- 7. Capture screenshots
- 8. Read test data from JSON
- 9. Handle popup/alerts if available
-10. Generate execution report (HTML)
-
-Run:
-    python ecommerce_automation.py
-
-Requirements:
-    pip install selenium webdriver-manager
+The script opens the site, searches for a product, adds it to the cart, and
+records a small HTML report with screenshots for review.
 """
 
 import json
@@ -43,8 +26,21 @@ from selenium.webdriver.chrome.service import Service
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SCREENSHOT_DIR = os.path.join(BASE_DIR, "screenshots")
 REPORT_DIR = os.path.join(BASE_DIR, "reports")
-DATA_FILE = os.path.join(BASE_DIR, "data", "test_data.json")
 
+
+def resolve_data_file():
+    """Support both the repo-root layout and the project/data-folder layout."""
+    candidates = [
+        os.path.join(BASE_DIR, "data", "test_data.json"),
+        os.path.join(BASE_DIR, "test_data.json"),
+    ]
+    for candidate in candidates:
+        if os.path.exists(candidate):
+            return candidate
+    return candidates[0]
+
+
+DATA_FILE = resolve_data_file()
 os.makedirs(SCREENSHOT_DIR, exist_ok=True)
 os.makedirs(REPORT_DIR, exist_ok=True)
 
@@ -136,6 +132,8 @@ class TestReport:
 
 
 def load_test_data():
+    if not os.path.exists(DATA_FILE):
+        raise FileNotFoundError(f"Could not find test data at: {DATA_FILE}")
     with open(DATA_FILE, "r", encoding="utf-8") as f:
         return json.load(f)
 
@@ -151,7 +149,7 @@ def take_screenshot(driver, name):
 
 
 def handle_alert_if_present(driver, report, timeout=3):
-    """Step 9: Handle any browser popup/alert if one appears."""
+    """Handle any browser popup/alert if one appears."""
     try:
         WebDriverWait(driver, timeout).until(EC.alert_is_present())
         alert = driver.switch_to.alert
@@ -163,7 +161,7 @@ def handle_alert_if_present(driver, report, timeout=3):
 
 
 def dismiss_consent_popup_if_present(driver, report):
-    """Some demo sites show cookie/consent banners - close them if present."""
+    """Close cookie or consent banners when the site shows them."""
     try:
         consent_btn = WebDriverWait(driver, 3).until(
             EC.element_to_be_clickable((By.XPATH, "//*[contains(text(),'Consent') or contains(text(),'Accept')]"))
@@ -187,7 +185,7 @@ def main():
 
     driver = None
     try:
-        # ---------- Step 1: Launch browser ----------
+        # Launch browser
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
         driver.implicitly_wait(5)
         wait = WebDriverWait(driver, 15)
@@ -196,7 +194,7 @@ def main():
 
         dismiss_consent_popup_if_present(driver, report)
 
-        # ---------- Step 2: Login to application ----------
+        # Login flow
         try:
             driver.get(data["base_url"] + "/login")
             wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[data-qa='login-email']")))
@@ -211,14 +209,13 @@ def main():
                 report.log(
                     "Login",
                     "SKIP",
-                    "Login not confirmed (demo credentials may be invalid/unregistered). "
-                    "Continuing as guest — cart flow does not require login on this site.",
+                    "Login not confirmed (demo credentials may be invalid/unregistered). Continuing as guest — cart flow does not require login on this site.",
                     take_screenshot(driver, "02_login_not_confirmed"),
                 )
         except (TimeoutException, NoSuchElementException) as e:
             report.log("Login", "SKIP", f"Login page/elements not found, continuing as guest: {e}")
 
-        # ---------- Step 3: Search product ----------
+        # Search for a product
         driver.get(data["base_url"] + "/products")
         wait.until(EC.presence_of_element_located((By.ID, "search_product")))
         search_box = driver.find_element(By.ID, "search_product")
@@ -238,14 +235,13 @@ def main():
         if not results:
             raise RuntimeError("No search results found — cannot continue with cart flow.")
 
-        # ---------- Step 4: Add product to cart ----------
+        # Add a product to the cart
         idx = min(data["cart"]["product_index_to_add"], len(results) - 1)
         product_card = results[idx]
         driver.execute_script("arguments[0].scrollIntoView({block:'center'});", product_card)
         add_to_cart_btn = product_card.find_element(By.CSS_SELECTOR, "a.add-to-cart")
         add_to_cart_btn.click()
 
-        # Modal usually appears with "Continue Shopping" / "View Cart"
         wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".modal-content")))
         report.log("Add Product To Cart", "PASS", f"Added product at index {idx} to cart.", take_screenshot(driver, "04_added_to_cart"))
 
@@ -255,22 +251,19 @@ def main():
         except NoSuchElementException:
             pass
 
-        # ---------- Step 5: Update quantity ----------
+        # Cart check
         driver.get(data["base_url"] + "/view_cart")
         wait.until(EC.presence_of_element_located((By.ID, "cart_info")))
         try:
             qty_input = driver.find_element(By.CSS_SELECTOR, "td.cart_quantity input.cart_quantity_input")
             qty_input.clear()
             qty_input.send_keys(str(data["cart"]["quantity_to_set"]))
-            # This site's cart quantity is typically read-only post-add; where editable,
-            # a page action (e.g. pressing Enter / triggering change) applies the update.
-            qty_input.send_keys("\ue007")  # Enter key
+            qty_input.send_keys("\ue007")
             time.sleep(1)
             report.log("Update Quantity", "PASS", f"Attempted to update quantity to {data['cart']['quantity_to_set']}.", take_screenshot(driver, "05_quantity_updated"))
         except NoSuchElementException:
             report.log("Update Quantity", "INFO", "Quantity field not directly editable on this cart page; quantity was set at add-to-cart time instead.")
 
-        # ---------- Step 6: Verify cart details ----------
         cart_rows = driver.find_elements(By.CSS_SELECTOR, "#cart_info_table tbody tr")
         cart_details = []
         for row in cart_rows:
@@ -293,7 +286,6 @@ def main():
         else:
             report.log("Verify Cart Details", "FAIL", "Cart appears empty — verification failed.", take_screenshot(driver, "06_cart_empty"))
 
-        # ---------- Step 9: Handle popup/alerts (checked at a natural trigger point) ----------
         handle_alert_if_present(driver, report)
 
         report.log("Test Flow Completed", "PASS", "All planned steps executed.")
@@ -307,7 +299,6 @@ def main():
         if driver:
             time.sleep(1)
             driver.quit()
-        # ---------- Step 10: Generate execution report ----------
         report_path = report.render_html()
         print(f"\nExecution report generated at: {report_path}")
 
